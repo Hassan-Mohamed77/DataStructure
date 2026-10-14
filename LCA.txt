@@ -1,0 +1,54 @@
+vector<vector<int>> anc, adj;
+vector<int> lv, in, out;
+int cnt = 0;
+void init(int n)
+{
+    anc.assign(n + 4, vector<int>((24)));
+    adj.assign(n + 4, {});
+    lv.assign(n + 4, {});
+    in.assign(n + 4, {});
+    out.assign(n + 4, {});
+}
+void bld(int u, int p)
+{
+    // cout << u << '\n';
+    lv[u] = lv[p] + 1;
+    in[u] = cnt++;
+    anc[u][0] = p;
+    for (int i = 1; i <= 22; i++)
+    {
+        int a = anc[u][i - 1];
+        anc[u][i] = anc[a][i - 1];
+    }
+    for (auto v : adj[u])
+    {
+        if (v != p)
+            bld(v, u);
+    }
+    out[u] = cnt - 1;
+}
+int kth(int u, int k)
+{
+    for (int i = 22; i >= 0; i--)
+    {
+        if ((k >> i) & 1)
+            u = anc[u][i];
+    }
+    return u;
+}
+int lca(int u, int v)
+{
+    if (lv[u] < lv[v])
+        swap(u, v);
+    u = kth(u, lv[u] - lv[v]);
+    if (u == v)
+        return v;
+    for (int i = 22; i >= 0; i--)
+    {
+        if (anc[u][i] != anc[v][i])
+        {
+            u = anc[u][i], v = anc[v][i];
+        }
+    }
+    return anc[u][0];
+}

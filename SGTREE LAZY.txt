@@ -1,0 +1,116 @@
+struct node
+{
+    int val, lazy1, lazy2;
+    bool islazy1, islazy2;
+    node()
+    {
+        val = 0;
+        lazy1 = islazy2 = lazy2 = islazy1 = 0;
+    }
+    node(int x)
+    {
+        val = x;
+        lazy1 = islazy2 = lazy2 = islazy1 = 0;
+    }
+    void change1(int x, int lx, int rx)
+    {
+        val += x * (rx - lx + 1);
+        lazy1 += x;
+        islazy1 = 1;
+    }
+    void change2(int x, int lx, int rx)
+    {
+        val = x * (rx - lx + 1);
+        lazy2 = x;
+        islazy2 = 1;
+        lazy1 = 0;
+        islazy1 = 0;
+    }
+};
+struct segtree
+{
+#define lf (x * 2 + 1)
+#define rf (x * 2 + 2)
+#define md ((lx + rx) / 2)
+    int sz;
+    vector<node> sg;
+    segtree(int n)
+    {
+        sg.assign(n * 4, node());
+        sz = n;
+    }
+    node merge(node &l, node &r)
+    {
+        node ans = node();
+        ans.val = l.val + r.val;
+        return ans;
+    }
+    void init(vector<int> &v, int x = 0, int lx = 0, int rx = -1)
+    {
+        if (rx == -1)
+            rx = sz - 1;
+        if (lx == rx)
+        {
+            if (lx < v.size())
+                sg[x] = node(v[lx]);
+            return;
+        }
+        init(v, lf, lx, md);
+        init(v, rf, md + 1, rx);
+        sg[x] = merge(sg[lf], sg[rf]);
+    }
+    void propagate(int x, int lx, int rx)
+    {
+        if (lx == rx)
+            return;
+        if (sg[x].islazy2 != 0)
+        {
+            sg[lf].change2(sg[x].lazy2, lx, md);
+            sg[rf].change2(sg[x].lazy2, md + 1, rx);
+            sg[x].lazy2 = sg[x].islazy2 = 0;
+            // sg[x].lazy1 = sg[x].islazy1 = 0;
+        }
+        if (sg[x].islazy1 != 0)
+        {
+            sg[lf].change1(sg[x].lazy1, lx, md);
+            sg[rf].change1(sg[x].lazy1, md + 1, rx);
+            sg[x].lazy1 = sg[x].islazy1 = 0;
+        }
+    }
+    void update(int l, int r, int val, int ty, int x = 0, int lx = 0, int rx = -1)
+    {
+        if (rx == -1)
+            rx = sz - 1;
+        propagate(x, lx, rx);
+        if (rx < l or r < lx)
+            return;
+        if (l <= lx and rx <= r)
+        {
+            if (ty == 1)
+            {
+                sg[x].change1(val, lx, rx);
+            }
+            else
+            {
+                sg[x].change2(val, lx, rx);
+            }
+            return;
+        }
+        update(l, r, val, ty, lf, lx, md);
+        update(l, r, val, ty, rf, md + 1, rx);
+        sg[x] = merge(sg[lf], sg[rf]);
+    }
+    node query(int l, int r, int x = 0, int lx = 0, int rx = -1)
+    {
+        if (rx == -1)
+            rx = sz - 1;
+        propagate(x, lx, rx);
+        if (rx < l or r < lx)
+            return node();
+        if (l <= lx and rx <= r)
+            return sg[x];
+        node la = query(l, r, lf, lx, md);
+        node rr = query(l, r, rf, md + 1, rx);
+        return merge(la, rr);
+    }
+};

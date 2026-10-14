@@ -1,0 +1,85 @@
+// updata point + query (l , r)
+
+struct node
+{
+    ll prf, sf, sm, mx;
+    node()
+    {
+        prf = sf = mx = -1e15;
+        sm = 0;
+    }
+    node(int x)
+    {
+        prf = sf = mx = sm = x;
+    }
+    void change(int x)
+    {
+        prf = sf = mx = sm = x;
+    }
+};
+struct segtree
+{
+#define lf (2 * x + 1)
+#define rf (2 * x + 2)
+#define md ((lx + rx) / 2)
+    int sz;
+    vector<node> sg;
+    segtree(int n)
+    {
+        sz = n;
+        sg.assign(sz * 4, node());
+    }
+    node merge(node &l, node &r)
+    {
+        node ans = node();
+        ans.mx = max(l.prf, l.sm + r.prf);
+        ans.prf = max(l.prf, l.sm + r.prf);
+        ans.sm = l.sm + r.sm;
+        return ans;
+    }
+    void update(ll i, ll val, ll x = 0, ll lx = 0, ll rx = -1)
+    {
+        if (rx == -1)
+            rx = sz - 1;
+        if (lx == rx)
+        {
+            sg[x].change(val);
+            return;
+        }
+        if (i <= md)
+        {
+            update(i, val, lf, lx, md);
+        }
+        else
+        {
+            update(i, val, rf, md + 1, rx);
+        }
+        sg[x] = merge(sg[lf], sg[rf]);
+    }
+    void init(vector<ll> &v, ll x = 0, ll lx = 0, ll rx = -1)
+    {
+        if (rx == -1)
+            rx = sz - 1;
+        if (lx == rx)
+        {
+            if (lx < v.size())
+                sg[x] = node(v[lx]);
+            return;
+        }
+        init(v, lf, lx, md);
+        init(v, rf, md + 1, rx);
+        sg[x] = merge(sg[lf], sg[rf]);
+    }
+    node query(ll l, ll r, ll x = 0, ll lx = 0, ll rx = -1)
+    {
+        if (rx == -1)
+            rx = sz - 1;
+        if (rx < l or r < lx)
+            return node();
+        if (l <= lx and rx <= r)
+            return sg[x];
+        node la = query(l, r, lf, lx, md);
+        node rr = query(l, r, rf, md + 1, rx);
+        return merge(la, rr);
+    }
+};
