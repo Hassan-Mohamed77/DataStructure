@@ -1,0 +1,32 @@
+class RangeFrequencyQuery {
+private:
+    // Maps each element to a sorted list of its positions/indices
+    std::unordered_map<int, std::vector<int>> position_map;
+
+public:
+    // Preprocessing: O(n) time and O(n) space
+    RangeFrequencyQuery(const std::vector<int>& arr) {
+        for (int i = 0; i < arr.size(); ++i) {
+            position_map[arr[i]].push_back(i);
+        }
+    }
+
+    // Query: O(log n) time
+    int query(int l, int r, int value) {
+        // If the element does not exist in the array, its frequency is 0
+        if (position_map.find(value) == position_map.end()) {
+            return 0;
+        }
+
+        const auto& indices = position_map[value];
+
+        // Find the first index >= l
+        auto left_it = std::lower_bound(indices.begin(), indices.end(), l);
+
+        // Find the first index > r
+        auto right_it = std::upper_bound(indices.begin(), indices.end(), r);
+
+        // The number of elements in range is the distance between iterators
+        return std::distance(left_it, right_it);
+    }
+};

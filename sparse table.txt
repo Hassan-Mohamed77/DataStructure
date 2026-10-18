@@ -1,0 +1,39 @@
+
+vector<vector<int>> sp;
+int mege(int a, int b)
+{
+    return __gcd(a, b);
+}
+void bld(const vector<int> &v)
+{
+    const int n = v.size();
+    sp = vector<vector<int>>(__lg(n) + 1, vector<int>(n + 1));
+    sp[0] = v;
+    for (int mask = 1; (1 << mask) <= n; mask++)
+    {
+        for (int i = 0; i + (1 << mask) <= n; i++)
+        {
+            int a = sp[mask - 1][i], b = sp[mask - 1][i + (1 << (mask - 1))];
+            sp[mask][i] = mege(sp[mask - 1][i], sp[mask - 1][i + (1 << (mask - 1))]);
+            int c = sp[mask][i];
+        }
+    }
+}
+int query(int l, int r)
+{
+    int len = r - l + 1, ans = 0;
+    for (int i = 0; l <= r; i++)
+    {
+        if ((len >> i) & 1)
+        {
+            ans = mege(ans, sp[i][l]);
+            l += (1 << i);
+        }
+    }
+    return ans;
+}
+int query1(int l, int r)
+{
+    int msk = __lg(r - l + 1);
+    return mege(sp[msk][l], sp[msk][r - (1 << msk) + 1]);
+}

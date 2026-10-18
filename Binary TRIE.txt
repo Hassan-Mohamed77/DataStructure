@@ -1,0 +1,35 @@
+struct node{
+    unordered_map<char,int>mp;
+    int is{}, sz{};
+    int &operator[](char x){
+        return mp[x];
+    }
+};
+struct trie{
+    vector<node> tr;
+    int add(){
+        tr.emplace_back();
+        return tr.size() - 1;
+    }
+    void init(){
+        tr.clear();
+        add();
+    }
+    trie(){
+        init();
+    }
+    void insert(string &s){
+        int u = 0;
+        for (auto x : s){
+            if(!tr[u][x]){
+                tr[u][x] = add();
+            }
+            u = tr[u][x];
+            if ( tr[u].is>0)
+                f = 1;
+            tr[u].sz++;
+        }
+        if(tr[u].mp.size())f=1;
+        tr[u].is++;
+    }
+};

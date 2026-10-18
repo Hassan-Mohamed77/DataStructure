@@ -1,0 +1,33 @@
+vector<int> prvGreater(vector<int> &a) {
+    int n = a.size() - 1;
+    vector<int> ans(n + 1, -1);
+    stack<int> st;
+
+    for (int i = 1; i <= n; i++) {
+        while (!st.empty() && a[st.top()] <= a[i])
+            st.pop();
+
+        if (!st.empty())
+            ans[i] = st.top();
+
+        st.push(i);
+    }
+    return ans;
+}
+vector<int> nxtGreater(vector<int> &a) {
+    int n = a.size() - 1;
+    vector<int> ans(n + 1, -1);
+    stack<int> st;
+
+    for (int i = n ; i >= 1; i--)
+    {
+        while (!st.empty() && a[st.top()] <= a[i])
+            st.pop();
+
+        if (!st.empty())
+            ans[i] = st.top();
+
+        st.push(i);
+    }
+    return ans;
+}
